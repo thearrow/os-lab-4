@@ -19,31 +19,29 @@
 int A[N][M], B[M][P], C1[N][P], C[N][P];
 
 void initMatrices(){
-	int i,j=0;
+//initialize matrices to specified values
     
+	int i,j=0;
 	//init A
 	for (i = 0; i < N; i++)
-	{
 		for (j = 0; j < M; j++)
-		{
 			A[i][j] = i+j;
-		}
-	}
     
 	//init B
 	for (i = 0; i < M; i++)
-	{
 		for (j = 0; j < P; j++)
-		{
 			B[i][j] = j;
-		}
-	}
+    
+    //init c
+    for (i = 0; i < N; i++)
+		for (j = 0; j < P; j++)
+			C[i][j] = -1;
 }
 
 void simpleMultiply(){
-	int i,j=0;
+//perform multiplication C1 = A * B
     
-	//perform multiplication C1 = A * B
+	int i,j=0;
 	for (i = 0; i < N; i++)
 	{
 		for(j = 0; j < P; j++){
@@ -56,24 +54,49 @@ void simpleMultiply(){
 	}
 }
 
-void *multiplyChunk(int n){
-    return NULL;
+int compareMatrices(){
+//compare matrices C1 and C, return 1 if they are equal, -1 otherwise
+    
+    int i,j=0;
+	for (i = 0; i < N; i++)
+	{
+		for(j = 0; j < P; j++){
+            if(C[i][j] != C1[i][j]){
+                return -1;
+            }
+        }
+    }    
+    
+    return 1;
 }
 
-void threadedMultiply(int n){
-	//create threads
-	pthread_t p_tid;
+void *multiplyChunk(void* n){
+    
+    int chunk = (int)n;
+    
+    return 0;
+}
+
+int threadedMultiply(int n){
+//perform C=A*B using n threads
+    
+    pthread_t* threads;
+    threads = (pthread_t*) malloc(n*sizeof(pthread_t));
 	pthread_attr_t p_attr;
 	pthread_attr_init(&p_attr);
 	int i=0;
 	while(i < n){
-		pthread_create(&p_tid,&p_attr,multiplyChunk(i),NULL);
+		pthread_create(&threads[i],&p_attr,multiplyChunk,(void*)i);
+        pthread_join(threads[i], NULL);
 		i++;
 	}
+    
+    free(threads);
+    return 0;
 }
 
-int main(void)
-{
+int main(void){
+//==================================
 	struct timeval start, end;
     
 	initMatrices();
@@ -81,9 +104,8 @@ int main(void)
     printf("Threads\t\tSeconds\n");
     
 	gettimeofday(&start, NULL);
-	simpleMultiply();
-	gettimeofday(&end, NULL);
-	
+	simpleMultiply(); //C1 = A*B
+	gettimeofday(&end, NULL);	
 	printf("\t1\t\t %lfs\n", ((end.tv_sec * 1000000 + end.tv_usec)
                               - (start.tv_sec * 1000000 + start.tv_usec))/1000000.0);
     
@@ -92,9 +114,14 @@ int main(void)
         gettimeofday(&start, NULL);
         threadedMultiply(i);
         gettimeofday(&end, NULL);
-        
         printf("\t%d\t\t %lfs\n", i, ((end.tv_sec * 1000000 + end.tv_usec)
                                   - (start.tv_sec * 1000000 + start.tv_usec))/1000000.0);
+        
+        int r=compareMatrices();
+        if(r==1)
+            printf("\t\tNo errors detected!\n");
+        else if (r==-1)
+            printf("\t\t\t\tError Detected!\n");
     }
     
 }
