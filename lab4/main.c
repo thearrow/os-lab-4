@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
+#include <pthread.h>
 
 #define M 1000
 #define N 1200
@@ -55,24 +56,45 @@ void simpleMultiply(){
 	}
 }
 
+void *multiplyChunk(int n){
+    return NULL;
+}
+
 void threadedMultiply(int n){
-	printf("%d",n);
+	//create threads
+	pthread_t p_tid;
+	pthread_attr_t p_attr;
+	pthread_attr_init(&p_attr);
+	int i=0;
+	while(i < n){
+		pthread_create(&p_tid,&p_attr,multiplyChunk(i),NULL);
+		i++;
+	}
 }
 
 int main(void)
 {
 	struct timeval start, end;
-	printf("Hello!\n");
     
 	initMatrices();
-    
 	printf("Matrices Initialized!\n");
+    printf("Threads\t\tSeconds\n");
     
 	gettimeofday(&start, NULL);
 	simpleMultiply();
 	gettimeofday(&end, NULL);
-    
-	printf("Threads\t\tSeconds\n");
+	
 	printf("\t1\t\t %lfs\n", ((end.tv_sec * 1000000 + end.tv_usec)
                               - (start.tv_sec * 1000000 + start.tv_usec))/1000000.0);
+    
+    int i=2;
+    for (i=2; i<=6; i++) {
+        gettimeofday(&start, NULL);
+        threadedMultiply(i);
+        gettimeofday(&end, NULL);
+        
+        printf("\t%d\t\t %lfs\n", i, ((end.tv_sec * 1000000 + end.tv_usec)
+                                  - (start.tv_sec * 1000000 + start.tv_usec))/1000000.0);
+    }
+    
 }
