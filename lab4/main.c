@@ -17,6 +17,7 @@
 #define P 500
 
 int A[N][M], B[M][P], C1[N][P], C[N][P];
+int num_threads = 1;
 
 void initMatrices(){
 //initialize matrices to specified values
@@ -71,8 +72,23 @@ int compareMatrices(){
 }
 
 void *multiplyChunk(void* n){
+//multiply nth chunk of matrices C=A*B
     
     int chunk = (int)n;
+    int start = (chunk*N)/num_threads;
+    int end = ((chunk+1)*N)/num_threads;
+    
+    int i,j=0;
+	for (i = start; i < end; i++)
+	{
+		for(j = 0; j < P; j++){
+            C[i][j] = 0;
+			int k=0;
+			for (k = 0; k < M; k++){
+				C[i][j] += A[i][k] * B[k][j];
+			}
+		}
+	}
     
     return 0;
 }
@@ -84,12 +100,17 @@ int threadedMultiply(int n){
     threads = (pthread_t*) malloc(n*sizeof(pthread_t));
 	pthread_attr_t p_attr;
 	pthread_attr_init(&p_attr);
+    num_threads = n;
 	int i=0;
-	while(i < n){
+	for(i=0;i<n;i++){
+        //create threads and pass 'chunk' number
 		pthread_create(&threads[i],&p_attr,multiplyChunk,(void*)i);
-        pthread_join(threads[i], NULL);
-		i++;
 	}
+    
+    for(i=0;i<n;i++){
+        //wait for all threads to finish
+        pthread_join(threads[i], NULL);
+    }
     
     free(threads);
     return 0;
@@ -110,7 +131,7 @@ int main(void){
                               - (start.tv_sec * 1000000 + start.tv_usec))/1000000.0);
     
     int i=2;
-    for (i=2; i<=6; i++) {
+    for (i=2; i<=8; i++) {
         gettimeofday(&start, NULL);
         threadedMultiply(i);
         gettimeofday(&end, NULL);
