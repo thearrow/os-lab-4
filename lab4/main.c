@@ -6,8 +6,11 @@
 //To compile, executethe command:
 // gcc -O1 -Wall -o mult main.c -lpthread
 //NOTE:('-O1' in the previous line is a capital letter 'o')
+//NOTE:(Ignore the harmless gcc warnings)
 
 //To run, execute the command: mult
+
+//This program multiplies two matrices using 1-8 threads and reports timing
 
 #include <stdio.h>
 #include <stdlib.h>
