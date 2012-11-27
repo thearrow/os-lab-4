@@ -3,8 +3,11 @@
 //klingler.45@osu.edu
 //OS Lab #4 (Multithreaded Matrix Multiplication)
 
-//To compile, execute: gcc main.c
-//To run the shell, execute: a.out
+//To compile, executethe command:
+// gcc -O1 -Wall -o mult main.c -lpthread
+//NOTE:('-O1' in the previous line is a capital letter 'o')
+
+//To run, execute the command: mult
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,11 +35,6 @@ void initMatrices(){
 	for (i = 0; i < M; i++)
 		for (j = 0; j < P; j++)
 			B[i][j] = j;
-    
-    //init c
-    for (i = 0; i < N; i++)
-		for (j = 0; j < P; j++)
-			C[i][j] = -1;
 }
 
 void simpleMultiply(){
@@ -72,7 +70,7 @@ int compareMatrices(){
 }
 
 void *multiplyChunk(void* n){
-//multiply nth chunk of matrices C=A*B
+//multiply 'n-th chunk' of matrices C=A*B
     
     int chunk = (int)n;
     int start = (chunk*N)/num_threads;
@@ -117,7 +115,6 @@ int threadedMultiply(int n){
 }
 
 int main(void){
-//==================================
 	struct timeval start, end;
     
 	initMatrices();
