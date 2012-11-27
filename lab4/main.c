@@ -114,19 +114,32 @@ int threadedMultiply(int n){
     return 0;
 }
 
+void printParts(){
+//print sections of matrices C and C1 for visual comparison
+    
+    int i=0;
+    printf("\tC:\t\t\tC1:\n");
+    for (i=444; i<456; i++) {
+        printf("\t%d\t\t%d\n",C[i][200],C1[i][200]);
+    }
+}
+
 int main(void){
+//perform matrix multiplication and timing
 	struct timeval start, end;
     
 	initMatrices();
 	printf("Matrices Initialized!\n");
     printf("Threads\t\tSeconds\n");
     
+    //perform + time single-threaded multiplication
 	gettimeofday(&start, NULL);
 	simpleMultiply(); //C1 = A*B
 	gettimeofday(&end, NULL);	
 	printf("\t1\t\t %lfs\n", ((end.tv_sec * 1000000 + end.tv_usec)
                               - (start.tv_sec * 1000000 + start.tv_usec))/1000000.0);
     
+    //perform + time multi-threaded multiplication for 2-8 threads
     int i=2;
     for (i=2; i<=8; i++) {
         gettimeofday(&start, NULL);
@@ -134,6 +147,9 @@ int main(void){
         gettimeofday(&end, NULL);
         printf("\t%d\t\t %lfs\n", i, ((end.tv_sec * 1000000 + end.tv_usec)
                                   - (start.tv_sec * 1000000 + start.tv_usec))/1000000.0);
+        
+    //printParts();
+    //uncomment to print a part of the matrices for visual comparison
         
         int r=compareMatrices();
         if(r==1)
